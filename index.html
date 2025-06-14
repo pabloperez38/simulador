@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Simulador de Construcción</title>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <style>
+            body {
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                max-width: 1000px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f5f5f5;
+                color: #333;
+            }
+            h1,
+            h2 {
+                color: #2c3e50;
+                text-align: center;
+                margin-bottom: 30px;
+            }
+            .container {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+            .controls {
+                background-color: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+            .results {
+                background-color: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+            .chart-container {
+                grid-column: span 2;
+                background-color: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                margin-top: 20px;
+            }
+            .control-group {
+                margin-bottom: 20px;
+            }
+            label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 600;
+            }
+            input[type="range"] {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            .value-display {
+                font-size: 18px;
+                font-weight: bold;
+                color: #2c3e50;
+            }
+            select {
+                width: 100%;
+                padding: 8px;
+                border-radius: 4px;
+                border: 1px solid #ddd;
+            }
+            .result-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+            .result-table th,
+            .result-table td {
+                padding: 12px;
+                text-align: left;
+                border-bottom: 1px solid #eee;
+            }
+            .result-table th {
+                background-color: #f8f9fa;
+                font-weight: 600;
+                color: #2c3e50;
+            }
+            .result-table tr:last-child td {
+                border-bottom: none;
+            }
+            .total-row {
+                font-weight: bold;
+                background-color: #f0f7ff;
+            }
+            .cost-value {
+                text-align: right;
+                font-family: monospace;
+            }
+            .warning {
+                color: #e74c3c;
+                font-size: 14px;
+                margin-top: 5px;
+            }
+            @media (max-width: 768px) {
+                .container {
+                    grid-template-columns: 1fr;
+                }
+                .chart-container {
+                    grid-column: span 1;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Simulador de Construcción</h1>
+
+        <div class="container">
+            <div class="controls">
+                <div class="control-group">
+                    <label for="metros">Metros cuadrados (m²):</label>
+                    <input
+                        type="range"
+                        id="metros"
+                        min="10"
+                        max="300"
+                        value="10"
+                        step="10" />
+                    <div class="value-display" id="metros-value">10 m²</div>
+                </div>
+
+                <div class="control-group">
+                    <label for="ladrillo">Tipo de ladrillo:</label>
+                    <select id="ladrillo">
+                        <option value="tradicional">
+                            Ladrillo tradicional ($5.75/unidad, 40/m²)
+                        </option>
+                        <option value="bloque">
+                            Ladrillo del 12 ($10.50/unidad, 16/m²)
+                        </option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="techo">Tipo de techo:</label>
+                    <select id="techo">
+                        <option value="lamina">Chapa ($1000/m²)</option>
+                        <option value="concreto">Concreto ($3000/m²)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="trabajadores">Cantidad de trabajadores:</label>
+                    <input
+                        type="range"
+                        id="trabajadores"
+                        min="1"
+                        max="15"
+                        value="3" />
+                    <div class="value-display" id="trabajadores-value">
+                        3 trabajadores
+                    </div>
+                    <div id="trabajadores-warning" class="warning"></div>
+                </div>
+
+                <div class="control-group">
+                    <label for="aberturas"
+                        >Cantidad de aberturas (puertas + ventanas):</label
+                    >
+                    <input
+                        type="range"
+                        id="aberturas"
+                        min="1"
+                        max="5"
+                        value="1" />
+                    <div class="value-display" id="aberturas-value">
+                        1 abertura
+                    </div>
+                </div>
+            </div>
+
+            <div class="results">
+                <h2>Resultados Detallados</h2>
+
+                <table class="result-table">
+                    <tr>
+                        <th>Concepto</th>
+                        <th>Detalle</th>
+                        <th>Valor</th>
+                    </tr>
+                    <tr>
+                        <td>Tiempo estimado</td>
+                        <td></td>
+                        <td class="cost-value" id="tiempo-result">0 días</td>
+                    </tr>
+                    <tr>
+                        <td>Área total</td>
+                        <td></td>
+                        <td class="cost-value" id="area-total-result">0 m²</td>
+                    </tr>
+                    <tr>
+                        <td>Materiales (paredes)</td>
+                        <td id="ladrillo-detail"></td>
+                        <td class="cost-value" id="costo-materiales-result">
+                            $0
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Techo</td>
+                        <td id="techo-detail"></td>
+                        <td class="cost-value" id="costo-techo-result">$0</td>
+                    </tr>
+                    <tr>
+                        <td>Cimientos</td>
+                        <td></td>
+                        <td class="cost-value" id="costo-cimientos-result">
+                            $0
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Instalaciones</td>
+                        <td></td>
+                        <td class="cost-value" id="costo-instalaciones-result">
+                            $0
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Mano de obra</td>
+                        <td id="mano-obra-detail"></td>
+                        <td class="cost-value" id="costo-mano-obra-result">
+                            $0
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Imprevistos</td>
+                        <td>(10% del subtotal)</td>
+                        <td class="cost-value" id="imprevistos-result">$0</td>
+                    </tr>
+                    <tr>
+                        <td>Ladrillos necesarios</td>
+                        <td id="ladrillos-detail"></td>
+                        <td class="cost-value" id="ladrillos-result">0</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td><strong>Costo total estimado</strong></td>
+                        <td></td>
+                        <td class="cost-value" id="costo-total-result">
+                            <strong>$0</strong>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="chart-container">
+                <h2>Distribución de Costos</h2>
+                <canvas id="costChart"></canvas>
+            </div>
+        </div>
+
+        <script>
+            // Datos de configuración
+            const config = {
+                ladrillos: {
+                    tradicional: {
+                        precio: 5.75,
+                        cantidadPorM2: 40,
+                        nombre: "Tradicional",
+                    },
+
+                    bloque: {
+                        precio: 10.5,
+                        cantidadPorM2: 16,
+                        nombre: "Bloque",
+                    },
+                },
+                techos: {
+                    lamina: { precio: 1000, nombre: "Chapa" },
+                    concreto: { precio: 3000, nombre: "Concreto" },
+                },
+                otrosCostos: {
+                    cimientos: 500, // $ por m²
+                    instalaciones: 300, // $ por m²
+                    imprevistos: 0.1, // 10% del subtotal
+                },
+                productividad: {
+                    base: 1, // m² por trabajador por día
+                    maxEficiencia: 5, // Número óptimo de trabajadores
+                    reduccionEficiencia: 0.9, // Factor de reducción por trabajador adicional
+                },
+            };
+
+            // Elementos del DOM
+            const elementos = {
+                inputs: {
+                    metros: document.getElementById("metros"),
+                    ladrillo: document.getElementById("ladrillo"),
+                    techo: document.getElementById("techo"),
+                    trabajadores: document.getElementById("trabajadores"),
+                    aberturas: document.getElementById("aberturas"),
+                },
+                displays: {
+                    metros: document.getElementById("metros-value"),
+                    trabajadores: document.getElementById("trabajadores-value"),
+                    aberturas: document.getElementById("aberturas-value"),
+                    trabajadoresWarning: document.getElementById(
+                        "trabajadores-warning"
+                    ),
+                },
+                resultados: {
+                    tiempo: document.getElementById("tiempo-result"),
+                    areaTotal: document.getElementById("area-total-result"),
+                    materiales: document.getElementById(
+                        "costo-materiales-result"
+                    ),
+                    techo: document.getElementById("costo-techo-result"),
+                    cimientos: document.getElementById(
+                        "costo-cimientos-result"
+                    ),
+                    instalaciones: document.getElementById(
+                        "costo-instalaciones-result"
+                    ),
+                    manoObra: document.getElementById("costo-mano-obra-result"),
+                    imprevistos: document.getElementById("imprevistos-result"),
+                    total: document.getElementById("costo-total-result"),
+                    ladrillos: document.getElementById("ladrillos-result"),
+                    ladrilloDetail: document.getElementById("ladrillo-detail"),
+                    techoDetail: document.getElementById("techo-detail"),
+                    manoObraDetail: document.getElementById("mano-obra-detail"),
+                    ladrillosDetail:
+                        document.getElementById("ladrillos-detail"),
+                },
+            };
+
+            // Inicializar gráfico
+            const costCtx = document
+                .getElementById("costChart")
+                .getContext("2d");
+            let costChart = new Chart(costCtx, {
+                type: "pie",
+                data: {
+                    labels: [
+                        "Paredes",
+                        "Techo",
+                        "Cimientos",
+                        "Instalaciones",
+                        "Mano de obra",
+                        "Imprevistos",
+                    ],
+                    datasets: [
+                        {
+                            data: [0, 0, 0, 0, 0, 0],
+                            backgroundColor: [
+                                "rgba(54, 162, 235, 0.7)",
+                                "rgba(255, 99, 132, 0.7)",
+                                "rgba(75, 192, 192, 0.7)",
+                                "rgba(153, 102, 255, 0.7)",
+                                "rgba(255, 159, 64, 0.7)",
+                                "rgba(199, 199, 199, 0.7)",
+                            ],
+                            borderWidth: 1,
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: "right",
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const label = context.label || "";
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce(
+                                        (a, b) => a + b,
+                                        0
+                                    );
+                                    const percentage = Math.round(
+                                        (value / total) * 100
+                                    );
+                                    return `${label}: $${value.toFixed(
+                                        2
+                                    )} (${percentage}%)`;
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+
+            // Event listeners
+            Object.values(elementos.inputs).forEach((input) => {
+                input.addEventListener("input", updateSimulation);
+                input.addEventListener("change", updateSimulation);
+            });
+
+            // Función para calcular eficiencia de trabajadores
+            function calcularEficiencia(trabajadores) {
+                const maxEficiencia = config.productividad.maxEficiencia;
+
+                if (trabajadores <= maxEficiencia) {
+                    return 1; // Eficiencia completa
+                } else {
+                    // Reducción progresiva de eficiencia por cada trabajador adicional
+                    const trabajadoresExtra = trabajadores - maxEficiencia;
+                    return Math.pow(
+                        config.productividad.reduccionEficiencia,
+                        trabajadoresExtra
+                    );
+                }
+            }
+
+            // Función para formatear dinero
+            function formatMoney(amount) {
+                return (
+                    "$" + amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")
+                );
+            }
+
+            // Función para actualizar la simulación
+            function updateSimulation() {
+                // Obtener valores actuales
+                const metros = parseInt(elementos.inputs.metros.value);
+                const tipoLadrillo = elementos.inputs.ladrillo.value;
+                const tipoTecho = elementos.inputs.techo.value;
+                let trabajadores = parseInt(
+                    elementos.inputs.trabajadores.value
+                );
+                const aberturas = parseInt(elementos.inputs.aberturas.value);
+
+                // Validar trabajadores
+                if (trabajadores > 10) {
+                    elementos.displays.trabajadoresWarning.textContent =
+                        "Advertencia: Más de 10 trabajadores puede reducir la eficiencia";
+                } else {
+                    elementos.displays.trabajadoresWarning.textContent = "";
+                }
+
+                // Actualizar displays
+                elementos.displays.metros.textContent = `${metros} m²`;
+                elementos.displays.trabajadores.textContent = `${trabajadores} trabajador${
+                    trabajadores !== 1 ? "es" : ""
+                }`;
+                elementos.displays.aberturas.textContent = `${aberturas} abertura${
+                    aberturas !== 1 ? "s" : ""
+                }`;
+
+                // Calcular área total
+                const areaTotal = metros;
+
+                // Obtener datos de configuración
+                const ladrillo = config.ladrillos[tipoLadrillo];
+                const techo = config.techos[tipoTecho];
+
+                // Calcular materiales
+                const ladrillosTotales = Math.floor(
+                    areaTotal * ladrillo.cantidadPorM2
+                );
+                const ladrillosAhorrados = aberturas * 30; // 30 ladrillos por abertura
+                const ladrillosNecesarios = Math.max(
+                    0,
+                    ladrillosTotales - ladrillosAhorrados
+                );
+                const costoMateriales = ladrillosNecesarios * ladrillo.precio;
+
+                // Calcular otros costos
+                const costoTecho = areaTotal * techo.precio;
+                const costoCimientos = areaTotal * config.otrosCostos.cimientos;
+                const costoInstalaciones =
+                    areaTotal * config.otrosCostos.instalaciones;
+
+                // Calcular tiempo con eficiencia
+                const eficiencia = calcularEficiencia(trabajadores);
+                const tiempoBase =
+                    areaTotal /
+                    (config.productividad.base * Math.max(1, trabajadores)) /
+                    eficiencia;
+                const tiempoAberturas = aberturas * 0.5; // 0.3 días por abertura
+                const tiempoTotal = Math.ceil(tiempoBase + tiempoAberturas);
+
+                // Calcular costos mano de obra
+                const costoManoObra = tiempoTotal * trabajadores * 200; // $200 por trabajador por día
+
+                // Calcular subtotal e imprevistos
+                const subtotal =
+                    costoMateriales +
+                    costoTecho +
+                    costoCimientos +
+                    costoInstalaciones +
+                    costoManoObra;
+                const costoImprevistos =
+                    subtotal * config.otrosCostos.imprevistos;
+
+                // Calcular costo total
+                const costoTotal = subtotal + costoImprevistos;
+
+                // Actualizar resultados en la tabla
+                elementos.resultados.tiempo.textContent = `${tiempoTotal} días`;
+                elementos.resultados.areaTotal.textContent = `${areaTotal} m²`;
+
+                elementos.resultados.materiales.textContent =
+                    formatMoney(costoMateriales);
+                elementos.resultados.ladrilloDetail.textContent = `${ladrillo.nombre} (${ladrillosNecesarios} unidades)`;
+
+                elementos.resultados.techo.textContent =
+                    formatMoney(costoTecho);
+                elementos.resultados.techoDetail.textContent = `${techo.nombre}`;
+
+                elementos.resultados.cimientos.textContent =
+                    formatMoney(costoCimientos);
+                elementos.resultados.instalaciones.textContent =
+                    formatMoney(costoInstalaciones);
+
+                elementos.resultados.manoObra.textContent =
+                    formatMoney(costoManoObra);
+                elementos.resultados.manoObraDetail.textContent = `${tiempoTotal} días × ${trabajadores} trabajador${
+                    trabajadores !== 1 ? "es" : ""
+                } × $200/día`;
+
+                elementos.resultados.imprevistos.textContent =
+                    formatMoney(costoImprevistos);
+                elementos.resultados.total.textContent =
+                    formatMoney(costoTotal);
+
+                elementos.resultados.ladrillos.textContent =
+                    ladrillosNecesarios;
+                elementos.resultados.ladrillosDetail.textContent = `${ladrillosTotales} total - ${ladrillosAhorrados} por ${aberturas} abertura${
+                    aberturas !== 1 ? "s" : ""
+                }`;
+
+                // Actualizar gráfico de costos
+                costChart.data.datasets[0].data = [
+                    costoMateriales,
+                    costoTecho,
+                    costoCimientos,
+                    costoInstalaciones,
+                    costoManoObra,
+                    costoImprevistos,
+                ];
+                costChart.update();
+            }
+
+            // Inicializar simulación
+            updateSimulation();
+        </script>
+    </body>
+</html>
