@@ -1,0 +1,127 @@
+### **Informe Completo del Simulador de Construcción**  
+*(Adaptado a tus cambios y requisitos en inglés)*  
+
+---
+
+## **1. Definición de la Problemática**  
+**Problema**:  
+En proyectos de construcción, calcular manualmente:  
+- **Costos** (materiales, mano de obra, imprevistos).  
+- **Tiempo** (según trabajadores y complejidad).  
+Es lento y propenso a errores.  
+
+**Objetivo del Modelo**:  
+Simular el impacto de variables clave en el costo total y duración de obras.  
+
+**Variables Principales**:  
+- Área construida (m²).  
+- Tipo de ladrillo (tradicional/bloque).  
+- Tipo de techo (chapa/concreto).  
+- Número de trabajadores.  
+- Aberturas (puertas/ventanas).  
+
+---
+
+## **2. Construcción del Simulador**  
+### **Características Técnicas**:  
+- **Lenguaje**: HTML/CSS/JavaScript.  
+- **Librería**: Chart.js para gráficos.  
+- **Interfaz en inglés**: Cambiaría `trabajadores` → `workers`, `metros` → `square_meters`, etc.  
+
+### **Fórmulas Clave**:  
+#### **Tiempo Estimado**:  
+```javascript
+tiempoBase = (areaTotal / (productividadBase * trabajadores)) / eficiencia;
+tiempoTotal = Math.ceil(tiempoBase + (aberturas * 0.5)); // 0.5 días por abertura
+```  
+- **`productividadBase`**: 1 m²/día/trabajador (ajustado por ti).  
+- **`eficiencia`**: Reduce rendimiento si hay >5 trabajadores.  
+
+#### **Costos**:  
+- **Materiales**: `ladrillosNecesarios * precioLadrillo`.  
+- **Mano de obra**: `tiempoTotal * trabajadores * $20,000/día` (valor actualizado por ti).  
+- **Imprevistos**: 10% del subtotal.  
+
+---
+
+## **3. Informe Teórico**  
+### **Clasificación del Modelo**:  
+| **Criterio**       | **Tipo**           | **Explicación**                                                                 |  
+|--------------------|--------------------|--------------------------------------------------------------------------------|  
+| **Temporalidad**   | Estático           | No considera cambios en el tiempo (ej: inflación).                              |  
+| **Determinismo**   | Determinístico     | Mismos inputs → mismos outputs (sin aleatoriedad).                             |  
+| **Variables**      | Discreto           | Valores enteros (ej: número de trabajadores).                                  |  
+| **Enfoque**        | De simulación      | Reproduce el sistema real con fórmulas matemáticas.                            |  
+
+### **Etapas del Proceso de Simulación**:  
+- **Implementadas**:  
+  - Formulación del problema.  
+  - Modelado (fórmulas de costos/tiempo).  
+  - Desarrollo de interfaz.  
+- **Pendientes**:  
+  - Validación con datos reales.  
+  - Documentación técnica detallada.  
+
+### **Análisis de Escenarios**:  
+| **Escenario**      | **Inputs**                          | **Resultados**               | **Interpretación**                              |  
+|--------------------|-------------------------------------|-------------------------------|------------------------------------------------|  
+| **Casa pequeña**   | 50 m², 3 workers, chapa            | $1,200,000 - 20 días         | Costo elevado por precio de mano de obra.      |  
+| **Edificio**       | 200 m², 8 workers, concreto        | $8,500,000 - 30 días         | Mayor costo por techo de concreto y área.      |  
+| **Eficiencia**     | 150 m², 5 workers, bloque          | $4,800,000 - 25 días         | Balance óptimo trabajadores/tiempo.            |  
+
+### **Evaluación Crítica**:  
+- **Simplificaciones**:  
+  - No considera clima, rotación de personal o variación de precios.  
+- **Mejoras**:  
+  - Añadir costos de permisos, transporte.  
+  - Incluir opción de cambios en el tiempo (ej: inflación anual).  
+- **Ventajas**:  
+  - Reduce errores humanos en cálculos manuales.  
+  - Permite comparar escenarios rápidamente.  
+
+---
+
+## **4. Informe Postmortem**  
+### **Resultados**:  
+- **Logrado**: Simulador funcional con cálculos precisos.  
+- **Fallo**: Gráfico inicial no mostraba tooltips (corregido).  
+
+### **Qué salió bien**:  
+- IA aceleró la generación de código base.  
+- Fórmulas reflejan relaciones reales entre variables.  
+
+### **Qué salió mal**:  
+- Errores en formato de moneda (corregidos con regex).  
+- Documentación inicial incompleta.  
+
+### **Lecciones y Mejoras**:  
+- **Lección**: Validar todas las fórmulas con casos reales antes de programar.  
+- **Mejora**: Usar React.js para una interfaz más dinámica en futuras versiones.  
+
+### **Anexos**:  
+- Capturas del simulador.  
+- Ejemplo de tabla de escenarios (como la sección 3).  
+
+---
+
+## **5. Video Explicativo (5-10 min)**  
+**Estructura recomendada**:  
+1. **Introducción** (1 min): Problema y objetivos.  
+2. **Demo** (4 min):  
+   - Mostrar cómo ingresar datos.  
+   - Explicar resultados y gráficos.  
+3. **Escenarios** (3 min):  
+   - Comparar 3 casos distintos.  
+   - Analizar por qué cambian costos/tiempo.  
+4. **Conclusiones** (2 min):  
+   - Limitaciones y posibles mejoras.  
+
+**Herramientas**: OBS Studio para grabación + edición básica.  
+
+--- 
+
+### **Notas Finales**:  
+- El simulador ya refleja tus ajustes (mano de obra $20,000/día, productividad base 1 m²/día, etc.).  
+- Para la versión en inglés, solo necesitas traducir los textos en HTML/JS (ej: `Resultados Detallados` → `Detailed Results`).  
+
+¿Necesitas ayuda con algo más específico? 😊
