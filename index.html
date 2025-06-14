@@ -478,7 +478,7 @@
                 const tiempoTotal = Math.ceil(tiempoBase + tiempoAberturas);
 
                 // Calcular costos mano de obra
-                const costoManoObra = tiempoTotal * trabajadores * 200; // $200 por trabajador por día
+                const costoManoObra = tiempoTotal * trabajadores * 20000; // $20000 por trabajador por día
 
                 // Calcular subtotal e imprevistos
                 const subtotal =
@@ -514,7 +514,7 @@
                     formatMoney(costoManoObra);
                 elementos.resultados.manoObraDetail.textContent = `${tiempoTotal} días × ${trabajadores} trabajador${
                     trabajadores !== 1 ? "es" : ""
-                } × $200/día`;
+                } × $20000/día`;
 
                 elementos.resultados.imprevistos.textContent =
                     formatMoney(costoImprevistos);
