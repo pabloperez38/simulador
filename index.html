@@ -25,13 +25,9 @@
                 grid-template-columns: 1fr 1fr;
                 gap: 20px;
             }
-            .controls {
-                background-color: white;
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            }
-            .results {
+            .controls,
+            .results,
+            .chart-container {
                 background-color: white;
                 padding: 20px;
                 border-radius: 8px;
@@ -39,10 +35,6 @@
             }
             .chart-container {
                 grid-column: span 2;
-                background-color: white;
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
                 margin-top: 20px;
             }
             .control-group {
@@ -83,9 +75,6 @@
                 background-color: #f8f9fa;
                 font-weight: 600;
                 color: #2c3e50;
-            }
-            .result-table tr:last-child td {
-                border-bottom: none;
             }
             .total-row {
                 font-weight: bold;
@@ -131,10 +120,10 @@
                     <label for="ladrillo">Brick type:</label>
                     <select id="ladrillo">
                         <option value="tradicional">
-                            Traditional brick ($550/unit, 40/m²)
+                            Traditional brick 24x12x5cm ($550/unit, 84/m²)
                         </option>
                         <option value="bloque">
-                            Block brick ($950/unit, 16/m²)
+                            Block 32x18x12cm ($950/unit, 18/m²)
                         </option>
                     </select>
                 </div>
@@ -143,7 +132,9 @@
                     <label for="techo">Roof type:</label>
                     <select id="techo">
                         <option value="lamina">Sheet metal ($1000/m²)</option>
-                        <option value="concreto">Concrete ($3000/m²)</option>
+                        <option value="concreto">
+                            Concrete slab ($3000/m²)
+                        </option>
                     </select>
                 </div>
 
@@ -156,7 +147,7 @@
                         max="15"
                         value="3" />
                     <div class="value-display" id="trabajadores-value">
-                        1 workers
+                        3 workers
                     </div>
                     <div id="trabajadores-warning" class="warning"></div>
                 </div>
@@ -179,7 +170,6 @@
 
             <div class="results">
                 <h2>Detailed Results</h2>
-
                 <table class="result-table">
                     <tr>
                         <th>Item</th>
@@ -268,24 +258,27 @@
                 ladrillos: {
                     tradicional: {
                         precio: 550,
-                        cantidadPorM2: 40,
-                        nombre: "Traditional",
+                        cantidadPorM2: 84, // 84 traditional bricks/m²
+                        nombre: "Traditional (24x12x5cm)",
+                        bricksPerOpening: 60, // 60 bricks saved per opening
                     },
                     bloque: {
                         precio: 950,
-                        cantidadPorM2: 16,
-                        nombre: "Block",
+                        cantidadPorM2: 18, // 18 block bricks/m²
+                        nombre: "Block (32x18x12cm)",
+                        bricksPerOpening: 20, // 20 bricks saved per opening
                     },
                 },
                 techos: {
                     lamina: { precio: 1000, nombre: "Sheet metal" },
-                    concreto: { precio: 3000, nombre: "Concrete" },
+                    concreto: { precio: 3000, nombre: "Concrete slab" },
                 },
                 otrosCostos: {
                     cimientos: 5500, // $ per m²
                     instalaciones: 4000, // $ per m²
-                    costoPorAbertura: 50000, // $100,000 per opening
+                    costoPorAbertura: 50000, // $50,000 per opening
                     imprevistos: 0.1, // 10% of subtotal
+                    dailyLaborCost: 20000, // $20,000 per worker per day
                 },
                 productividad: {
                     base: 1, // m² per worker per day
@@ -469,7 +462,8 @@
                 const ladrillosTotales = Math.floor(
                     areaTotal * ladrillo.cantidadPorM2
                 );
-                const ladrillosAhorrados = aberturas * 30; // 30 bricks per opening
+                const ladrillosAhorrados =
+                    aberturas * ladrillo.bricksPerOpening;
                 const ladrillosNecesarios = Math.max(
                     0,
                     ladrillosTotales - ladrillosAhorrados
@@ -494,7 +488,10 @@
                 const tiempoTotal = Math.ceil(tiempoBase + tiempoAberturas);
 
                 // Calculate labor costs
-                const costoManoObra = tiempoTotal * trabajadores * 20000; // $20,000 per worker per day
+                const costoManoObra =
+                    tiempoTotal *
+                    trabajadores *
+                    config.otrosCostos.dailyLaborCost;
 
                 // Calculate subtotal and contingencies
                 const subtotal =
@@ -529,7 +526,7 @@
 
                 elementos.resultados.aberturas.textContent =
                     formatMoney(costoAberturas);
-                elementos.resultados.aberturasDetail.textContent = `${aberturas} opening(s) × $100,000`;
+                elementos.resultados.aberturasDetail.textContent = `${aberturas} opening(s) × $50,000`;
 
                 elementos.resultados.manoObra.textContent =
                     formatMoney(costoManoObra);
