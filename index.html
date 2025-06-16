@@ -131,10 +131,10 @@
                     <label for="ladrillo">Brick type:</label>
                     <select id="ladrillo">
                         <option value="tradicional">
-                            Traditional brick ($5.75/unit, 40/m²)
+                            Traditional brick ($550/unit, 40/m²)
                         </option>
                         <option value="bloque">
-                            Block brick ($10.50/unit, 16/m²)
+                            Block brick ($950/unit, 16/m²)
                         </option>
                     </select>
                 </div>
@@ -156,7 +156,7 @@
                         max="15"
                         value="3" />
                     <div class="value-display" id="trabajadores-value">
-                        3 workers
+                        1 workers
                     </div>
                     <div id="trabajadores-warning" class="warning"></div>
                 </div>
@@ -267,12 +267,12 @@
             const config = {
                 ladrillos: {
                     tradicional: {
-                        precio: 5.75,
+                        precio: 550,
                         cantidadPorM2: 40,
                         nombre: "Traditional",
                     },
                     bloque: {
-                        precio: 10.5,
+                        precio: 950,
                         cantidadPorM2: 16,
                         nombre: "Block",
                     },
@@ -282,9 +282,9 @@
                     concreto: { precio: 3000, nombre: "Concrete" },
                 },
                 otrosCostos: {
-                    cimientos: 1500, // $ per m²
-                    instalaciones: 300, // $ per m²
-                    costoPorAbertura: 100000, // $100,000 per opening
+                    cimientos: 5500, // $ per m²
+                    instalaciones: 4000, // $ per m²
+                    costoPorAbertura: 50000, // $100,000 per opening
                     imprevistos: 0.1, // 10% of subtotal
                 },
                 productividad: {
